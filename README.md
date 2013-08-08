@@ -49,10 +49,10 @@ def stop(image=None):
 run()
 ```
 
-Later in you shell:
+Now you can use the env.py as your command line tool:
 
 ```bash
 python env.py ps --all
-python env.py ps build base ~/images/base
-python env.py ps build stop --image dev/.*
+python env.py build base ~/images/base
+python env.py build stop --image dev/.*
 ```
