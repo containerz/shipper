@@ -39,7 +39,7 @@ def start(image, command, ports=None):
     if ports:
         ports = ports.split(",")
     s = Shipper()
-    s.run_once(image, command, ports=ports)
+    s.run(image, command, ports=ports, once=True)
 
 @command
 def stop(image=None):
