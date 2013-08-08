@@ -19,7 +19,9 @@ Undergoing development. Is already useful for building dev environments.
 Examples
 --------
 
-File env.py:
+Define the commands that orchestrate your environments as python code
+
+In file env.py:
 
 ```python
 from shipper import Shipper, run, command
@@ -49,7 +51,7 @@ def stop(image=None):
 run()
 ```
 
-Now you can use the env.py as your command line tool:
+Now you can use the env.py file as your command line tool, shipper has generated the command line interface.
 
 ```bash
 python env.py ps --all
