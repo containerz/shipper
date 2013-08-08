@@ -8,8 +8,9 @@ Setup
 -----
 
 ```shell
-git clone ..
-python setup.py develop
+git clone git@github.com:mailgun/shipper.git
+cd shipper
+python setup.py install
 ```
 
 Status
