@@ -1,13 +1,17 @@
 Shipper
 -------
 
-Shipper is a fabric for docker. The concept is that you can build your own
-environment
+Shipper is a fabric for docker - library for orchestrating docker containers.
+Supports parallel execution and can generate command line interface.
 
 Setup
 -----
-git clone ..
-python setup.py develop
+
+```shell
+git clone git@github.com:mailgun/shipper.git
+cd shipper
+python setup.py install
+```
 
 Status
 ------
@@ -16,10 +20,12 @@ Undergoing development. Is already useful for building dev environments.
 Examples
 --------
 
-File env.py:
+Define the commands that orchestrate your environments as python code
+
+In file env.py:
 
 ```python
-from shipper import Shipper, launch, command
+from shipper import Shipper, run, command
 
 @command
 def build(tag, path):
@@ -29,27 +35,27 @@ def build(tag, path):
 @command
 def ps(all=False, running=True):
     s = Shipper(["host-a", "host-b"])
-    print s.containers(pretty_print=True, all=all, running=running)
+    print s.containers(pretty=True, all=all, running=running)
 
 @command
 def start(image, command, ports=None):
     if ports:
         ports = ports.split(",")
     s = Shipper()
-    s.run_once(image, command, ports=ports)
+    s.run(image, command, ports=ports, once=True)
 
 @command
 def stop(image=None):
     s = Shipper()
     s.stop(*s.containers(image=image, running=True))
 
-launch()
+run()
 ```
 
-Later in you shell:
+Now you can use the env.py file as your command line tool, shipper has generated the command line interface.
 
 ```bash
 python env.py ps --all
-python env.py ps build base ~/images/base
-python env.py ps build stop --image dev/.*
+python env.py build base ~/images/base
+python env.py build stop --image dev/.*
 ```
