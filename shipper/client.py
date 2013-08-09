@@ -1,17 +1,9 @@
-"""
-Copyright [2013] [Rackspace]
+# coding: utf-8
+# Licensed under the Apache License, Version 2.0 (the "License")
+# See LICENSE for details
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+"""Twisted based client with paralell execution in mind and fixes
+quirks of the official docker-py client.
 """
 
 import re
@@ -28,14 +20,11 @@ from twisted.internet import threads
 
 import treq
 
-from .utils import (
-    from_epoch,
-    parse_hosts,
-    container_config,
-    images_to_ascii_table,
-    containers_to_ascii_table,
-    parse_volumes)
-
+from .utils import parse_volumes
+from .container import Container, container_config
+from .image import Image
+from .host import parse_hosts
+from .pretty import  images_to_ascii_table, containers_to_ascii_table
 from .build import parse_build
 from .parallel import blocking_call, Call
 from .errors import assert_status
@@ -57,11 +46,17 @@ class Shipper(object):
 
     @classmethod
     def startup(cls):
+        """Initiates connection pool and logging.
+
+        We can not use persisten connections here as docker server
+        has some troubles with those
+        """
         cls.pool = HTTPConnectionPool(reactor, persistent=False)
         cls._init_logging()
 
     @classmethod
     def shutdown(cls):
+        """Shuts down connection pool"""
         threads.blockingCallFromThread(
             reactor, cls.pool.closeCachedConnections)
 
@@ -192,38 +187,35 @@ class Shipper(object):
         """Creates a container and runs it
         """
         once = kwargs.pop('once', False)
-        hosts = self.hosts
+        hosts = copy(self.hosts)
         if once:
-            hosts = []
             containers = _grouped_by_host(self.containers(running=True))
             for host, values in containers.iteritems():
-                if not _find_container(values, image, command):
-                    hosts.append(host)
+                if _find_container(values, image, command):
+                    print "Removing:", host, image
+                    hosts.remove(host)
                     self.log.debug(
-                        "Container {} {} is not running on {}".format(
+                        "Container {} {} is running on {}".format(
                             image, host, command))
-                else:
-                    self.log.debug(
-                        "Container {} {} is already running on {}".format(
-                            image, host, command))
+
+        if not hosts:
+            return
 
         volumes, binds = parse_volumes(kwargs.pop('volumes', []))
         kwargs['volumes'] = volumes
         kwargs['hosts'] = hosts
         containers = self.create_container(image, command, **kwargs)
+
         self.start(*containers, binds=binds)
         self.log.debug("Containers({}) {} {} started".format(
                 containers, image, command))
 
 
-    def create_container(self, image, command, hostname=None, user=None,
-        detach=False, stdin_open=False, tty=False, mem_limit=0, ports=None,
-        environment=None, dns=None, volumes=None, volumes_from=None,
-                         hosts=None):
-        config = container_config(image, command, hostname, user,
-            detach, stdin_open, tty, mem_limit, ports, environment, dns,
-            volumes, volumes_from)
+    def create_container(self, image, command, **kwargs):
+        hosts = kwargs.pop('hosts')
+        config = container_config(image, command, **kwargs)
         return self.create_container_from_config(config, hosts)
+
 
     def create_container_from_config(self, config, hosts=None):
         return _containers_from_responses(self._post(
@@ -329,94 +321,19 @@ class Shipper(object):
         log.addHandler(h)
 
 
+Response = namedtuple("Response", "host code content")
+
 def _grouped_by_host(values):
     grouped = {}
     for v in values:
         grouped.setdefault(v.host, []).append(v)
     return grouped
 
-
 def _find_container(containers, image, command):
     image, command = image.strip().lower(), command.strip().lower()
     for container in containers:
         if image == container.image and command == container.command:
             return container
-
-
-Response = namedtuple("Response", "host code content")
-
-class Container(dict):
-    def __init__(self, host, values):
-        dict.__init__(self)
-        self.update(values)
-        self.host = host
-
-    def __str__(self):
-        return "Container(host={}, values={})".format(
-            self.host, dict.__str__(self))
-
-    @property
-    def id(self):
-        return self.get('Id')
-
-    @property
-    def command(self):
-        return (self.get('Command') or "").strip()
-
-    @property
-    def is_running(self):
-        return self.status.startswith("Up")
-
-    @property
-    def is_stopped(self):
-        return self.status.startswith("Exit")
-
-    @property
-    def image(self):
-        return (self.get('Image') or "").strip()
-
-    @property
-    def created(self):
-        return from_epoch(self['Created'])
-
-    @property
-    def status(self):
-        return self.get("Status") or ""
-
-    @property
-    def ports(self):
-        return self['Ports']
-
-
-class Image(dict):
-    def __init__(self, host, values):
-        dict.__init__(self)
-        self.update(values)
-        self.host = host
-
-    def __str__(self):
-        return "Image(host={}, values={})".format(
-            self.host, dict.__str__(self))
-
-    @property
-    def repository(self):
-        return self.get('Repository') or ''
-
-    @property
-    def tag(self):
-        return self.get('Tag') or ''
-
-    @property
-    def created(self):
-        return from_epoch(self['Created'])
-
-    @property
-    def id(self):
-        return self.get('Id')
-
-    @property
-    def size(self):
-        return self['Size']
 
 def _containers_from_responses(responses):
     containers = []
