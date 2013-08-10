@@ -17,9 +17,9 @@ run()
 Now your file is a fully functional command line tool that talks to local docker!
 
 ```bash
-python hello.py ps
 python hello.py -h
-python hello.py ps -h
+python hello.py hello -h
+python hello.py hello
 ```
 
 The fun part is you can turn your tiny hello.py to a massive scale docker client in 1 change:
