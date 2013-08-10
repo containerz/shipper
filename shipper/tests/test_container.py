@@ -3,7 +3,7 @@
 # See LICENSE for details
 
 from twisted.trial import unittest
-from shipper.container import container_config
+from shipper.container import ContainerConfig
 
 
 class ShipperContainerTestCase(unittest.TestCase):
@@ -15,7 +15,7 @@ class ShipperContainerTestCase(unittest.TestCase):
         """Makes sure defaults for container config function
         are sane.
         """
-        config = container_config("shipper/base", "echo 'hi'")
+        config = ContainerConfig("shipper/base", "echo 'hi'")
         expected = {
             'AttachStderr': False,
             'AttachStdin': False,
@@ -40,7 +40,7 @@ class ShipperContainerTestCase(unittest.TestCase):
         """Make sure all parameters are converted
         properly and to the right properties.
         """
-        config = container_config(
+        config = ContainerConfig(
             "shipper/base",
             "echo 'hi'",
             hostname="localhost",

@@ -8,30 +8,38 @@ import shlex
 from .utils import from_epoch
 
 
-def container_config(image, command, **kwargs):
-    """Maker for container config that is understood
-    by docker API
+class ContainerConfig(dict):
+    """Container configuration helper.
     """
-    if isinstance(command, six.string_types):
-        command = shlex.split(command)
-    get = kwargs.get
-    return {
-        'Hostname': get('hostname'),
-        'PortSpecs': get('ports'),
-        'User': get('user'),
-        'Tty': get('tty', False),
-        'OpenStdin': get('stdin_open', False),
-        'Memory': get('mem_limit', 0),
-        'AttachStdin': get('attach_stdin', False),
-        'AttachStdout': get('attach_stdout', False),
-        'AttachStderr': get('attach_stderr', False),
-        'Env': get('environment'),
-        'Cmd': command,
-        'Dns': get('dns'),
-        'Image': image,
-        'Volumes': get('volumes'),
-        'VolumesFrom': get('volumes_from'),
-    }
+    def __init__(self, image, command, **kwargs):
+        dict.__init__(self)
+        self.host = None
+
+        if isinstance(command, six.string_types):
+            command = shlex.split(command)
+
+        get = kwargs.get
+        self.update({
+                'Hostname': get('hostname'),
+                'PortSpecs': get('ports'),
+                'User': get('user'),
+                'Tty': get('tty', False),
+                'OpenStdin': get('stdin_open', False),
+                'Memory': get('mem_limit', 0),
+                'AttachStdin': get('attach_stdin', False),
+                'AttachStdout': get('attach_stdout', False),
+                'AttachStderr': get('attach_stderr', False),
+                'Env': get('environment'),
+                'Cmd': command,
+                'Dns': get('dns'),
+                'Image': image,
+                'Volumes': get('volumes'),
+                'VolumesFrom': get('volumes_from'),
+        })
+
+    def to_json(self):
+        return self
+
 
 class Container(dict):
     """Helper wrapper around container dictionary
@@ -39,11 +47,11 @@ class Container(dict):
     """
     def __init__(self, host, values):
         dict.__init__(self)
-        self.update(values)
         self.host = host
+        self.update(values)
 
     def __str__(self):
-        return "Container(host={}, values={})".format(
+        return "Container(host={}, {})".format(
             self.host, dict.__str__(self))
 
     @property
@@ -77,3 +85,4 @@ class Container(dict):
     @property
     def ports(self):
         return self['Ports']
+

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-def assert_status(code, message):
+def assert_code(code, message):
     """Raises stored :class:`HTTPError`, if one occurred."""
 
     if 400 <= code < 500:

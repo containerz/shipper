@@ -16,7 +16,7 @@ limitations under the License.
 from twisted.internet import epollreactor
 epollreactor.install()
 
-from .client import Shipper
+from .shipper import Shipper
 from .runner import run, command
 
 

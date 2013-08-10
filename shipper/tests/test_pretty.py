@@ -3,10 +3,6 @@
 # See LICENSE for details
 
 from twisted.trial import unittest
-from datetime import datetime
-from calendar import timegm
-
-from shipper import pretty, client, utils
 
 
 class ShipperPrettyTestCase(unittest.TestCase):
@@ -15,4 +11,4 @@ class ShipperPrettyTestCase(unittest.TestCase):
     """
 
     def test_pretty_print_images(self):
-        images = [client.Image]
+        pass

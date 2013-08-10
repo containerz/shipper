@@ -18,7 +18,27 @@ import tarfile
 
 from StringIO import StringIO
 
-def parse_build(path=None, fobj=None):
+
+class DockerFile(object):
+    """Represents the docker file that can be either
+    * a remote http, https, or git url
+    * a local url
+    * or a local tar archive
+    """
+    def __init__(self, path=None, fobj=None):
+        self.archive, self.url  = _parse_build(path, fobj)
+
+    @property
+    def is_remote(self):
+        return bool(self.url)
+
+    @property
+    def is_local(self):
+        return self.archive is not None
+
+
+
+def _parse_build(path=None, fobj=None):
     """Parses build parameters. Returns tuple
     (archive, remote)
 
