@@ -21,10 +21,7 @@ Examples
 --------
 
 Define the commands that orchestrate your environments as python code.
-
-Create a python file:
-
-hello.py
+Create a python file, e.g. hello.py:
 
 ```python
 from shipper import *
@@ -36,7 +33,7 @@ def hello():
 run() 
 ```
 
-Now your file is a fully functional command line tool that talks to local docker.
+Now your file is a fully functional command line tool that talks to local docker!
 
 ```bash
 python hello.py ps
