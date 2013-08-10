@@ -22,7 +22,7 @@ Examples
 
 Define the commands that orchestrate your environments as python code.
 
-Just create a python file:
+Create a python file:
 
 hello.py
 
@@ -33,8 +33,7 @@ from shipper import *
 def hello():
    print Shipper().containers(pretty=True)
  
-run()
- 
+run() 
 ```
 
 Now your file is a fully functional command line tool that talks to local docker.
