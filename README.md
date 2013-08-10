@@ -20,9 +20,40 @@ Undergoing development. Is already useful for building dev environments.
 Examples
 --------
 
-Define the commands that orchestrate your environments as python code
+Define the commands that orchestrate your environments as python code.
 
-In file env.py:
+Just create a python file:
+
+hello.py
+
+```python
+from shipper import *
+
+@command
+def hello():
+   print Shipper().containers(pretty=True)
+ 
+run()
+ 
+```
+
+Now your file is a fully functional command line tool that talks to local docker.
+
+```bash
+python hello.py ps
+python hello.py -h
+python hello.py ps -h
+```
+
+The fun part is you can turn your tiny hello.py to a massive scale docker client in 1 change:
+
+```python
+print Shipper(["host-a", "host-b", "host-c", "host-d"]).containers(pretty=True)
+```
+
+All the steps would be executed in parallel.
+
+More complex example:
 
 ```python
 from shipper import Shipper, run, command
