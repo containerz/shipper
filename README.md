@@ -1,28 +1,36 @@
 Shipper
 -------
-
-Shipper is a fabric for docker - library for orchestrating docker containers.
+Shipper is a fabric for docker - tool for orchestrating docker containers.
 Supports parallel execution and can generate command line interface.
 
-Setup
------
+hello.py:
+```python
+from shipper import *
 
-```shell
-git clone git@github.com:mailgun/shipper.git
-cd shipper
-python setup.py install
+@command
+def hello():
+   print Shipper().containers(pretty=True)
+ 
+run() 
 ```
 
-Status
-------
-Undergoing development. Is already useful for building dev environments.
+Now your file is a fully functional command line tool that talks to local docker!
 
-Examples
---------
+```bash
+python hello.py -h
+python hello.py hello -h
+python hello.py hello
+```
 
-Define the commands that orchestrate your environments as python code
+The fun part is you can turn your tiny hello.py to a massive scale docker client in 1 change:
 
-In file env.py:
+```python
+print Shipper(["host-a", "host-b", "host-c", "host-d"]).containers(pretty=True)
+```
+
+All the steps would be executed in parallel.
+
+More complex example:
 
 ```python
 from shipper import Shipper, run, command
@@ -59,3 +67,16 @@ python env.py ps --all
 python env.py build base ~/images/base
 python env.py build stop --image dev/.*
 ```
+
+
+Setup
+-----
+```shell
+git clone git@github.com:mailgun/shipper.git
+cd shipper
+python setup.py install
+```
+
+Status
+------
+Undergoing development. Is already useful for building dev environments.
