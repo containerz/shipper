@@ -24,17 +24,18 @@ class ContainerConfig(dict):
                 'PortSpecs': get('ports'),
                 'User': get('user'),
                 'Tty': get('tty', False),
-                'OpenStdin': get('stdin_open', False),
+                'OpenStdin': get('open_stdin', False),
                 'Memory': get('mem_limit', 0),
-                'AttachStdin': get('attach_stdin', False),
-                'AttachStdout': get('attach_stdout', False),
-                'AttachStderr': get('attach_stderr', False),
+                'AttachStdin': get('stdin', False),
+                'AttachStdout': get('stdout', False),
+                'AttachStderr': get('stderr', False),
                 'Env': get('environment'),
                 'Cmd': command,
                 'Dns': get('dns'),
                 'Image': image,
                 'Volumes': get('volumes'),
                 'VolumesFrom': get('volumes_from'),
+                'StdinOnce': get('stdin_once', False)
         })
 
     def to_json(self):

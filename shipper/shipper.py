@@ -51,7 +51,7 @@ class Shipper(object):
         threads.blockingCallFromThread(
             reactor, cls.pool.closeCachedConnections)
 
-    def __init__(self, hosts=None, version="1.3", timeout=None):
+    def __init__(self, hosts=None, version="1.4", timeout=None):
         self.hosts = parse_hosts(hosts or ["localhost"])
         self.c = Client(version, timeout, log=self.log, pool=self.pool)
 
@@ -153,6 +153,17 @@ class Shipper(object):
                  })
                  for c in containers]
         self.parallel(self.c.stop, stop_args)
+        return containers
+
+    def attach(self, *containers, **kwargs):
+        self.log.debug("Attaching to {}".format(containers))
+        calls = []
+        for c in containers:
+            kw = copy(kwargs)
+            kw['container'] = c
+            calls.append((c.host, kw))
+        self.parallel(self.c.attach, calls)
+        return containers
 
     def run(self, image, command, **kwargs):
         """Creates a container and runs it
@@ -169,7 +180,7 @@ class Shipper(object):
                         "Container {} {} is already running on {}".format(
                             image, host, command))
         if not hosts:
-            return
+            return []
 
         volumes, binds = parse_volumes(kwargs.pop('volumes', []))
         kwargs['volumes'] = volumes
@@ -179,6 +190,7 @@ class Shipper(object):
         self.start(*containers, binds=binds)
         self.log.debug("Containers({}) {} {} started".format(
                 containers, image, command))
+        return containers
 
 
     @classmethod

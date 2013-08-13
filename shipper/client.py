@@ -5,7 +5,6 @@
 """Twisted based client with paralell execution in mind and fixes
 quirks of the official docker-py client.
 """
-
 import re
 import json
 import logging
@@ -14,9 +13,10 @@ from copy import copy
 
 from twisted.internet import reactor
 from twisted.web.client import HTTPConnectionPool
-from twisted.internet.defer import Deferred
+from twisted.internet.defer import Deferred, succeed
+from twisted.internet.protocol import Protocol
+from twisted.web.client import ResponseDone
 import treq
-
 from .errors import assert_code
 
 class Client(object):
@@ -28,12 +28,11 @@ class Client(object):
     pool = None
     log = None
 
-    def __init__(self, version="1.3", timeout=None, log=None, pool=None):
+    def __init__(self, version="1.4", timeout=None, log=None, pool=None):
         self.pool = pool or HTTPConnectionPool(reactor, persistent=False)
         self.version = version
         self.timeout = timeout
         self.log = log or logging.getLogger(__name__)
-
 
     def build(self, host, dockerfile, tag=None, quiet=False):
         """Run build of a container from buildfile
@@ -126,6 +125,35 @@ class Client(object):
                          params={'t': wait_seconds},
                          expect_json=False)
 
+    def attach(self, host, container, **kwargs):
+        def c(v):
+            return 1 if kwargs.get(v) else 0
+        params = {
+            'logs': c('logs'),
+            'stream': c('stream'),
+            'stdin': 0,
+            'stdout': c('stdout'),
+            'stderr': c('stderr')
+        }
+
+        result = Deferred()
+        def on_content(line):
+            if line:
+                self.log.debug("{}: {}".format(host, line.strip()))
+
+        url = self._make_url(
+            host.url, 'containers/{}/attach'.format(container.id))
+        d = treq.post(
+            url=url,
+            params=params,
+            pool=self.pool)
+
+        d.addCallback(_Reader.listen, kwargs.get('stop_line'))
+        def on_error(failure):
+            pass
+        d.addErrback(on_error)
+        return result
+
     def request(self, method, host, path, **kwargs):
 
         kwargs = copy(kwargs)
@@ -185,3 +213,31 @@ def _remove_empty(params):
         if val is None:
             del clean_params[key]
     return clean_params
+
+
+class _Reader(Protocol):
+    def __init__(self, finished, stop_line):
+        self.finished = finished
+        if stop_line:
+            self.stop_line = re.compile(stop_line, re.I)
+        else:
+            self.stop_line = None
+
+    def dataReceived(self, data):
+        if self.stop_line and self.stop_line.search(data):
+            self.transport._producer.looseConnection()
+
+    def connectionLost(self, reason):
+        if reason.check(ResponseDone):
+            self.finished.callback(None)
+            return
+        self.finished.errback(reason)
+
+    @classmethod
+    def listen(cls, response, data):
+        if response.length == 0:
+            return succeed(None)
+        d = Deferred()
+        response.deliverBody(cls(d, data))
+        return d
+

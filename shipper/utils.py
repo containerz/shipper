@@ -3,8 +3,7 @@
 # See LICENSE for details
 
 import time
-
-
+import os.path
 from datetime import datetime
 
 import ago
@@ -66,6 +65,8 @@ def parse_volumes(vals):
     for string in (vals or []):
         out = string.split(":", 1)
         if len(out) == 2:
+            if string.startswith("~"):
+                string = os.path.expanduser(string)
             binds.append(string)
             destination = out[1]
             volumes[destination] = {}
