@@ -111,6 +111,12 @@ class Client(object):
             data=config.to_json(),
             post_json=True)
 
+
+    def inspect(self, host, container):
+        return self.get(
+            host, "containers/{}/json".format(container.id),
+            expect_json=True)
+
     def start(self, host, container, binds=None):
         self.log.debug("Starting {} {}".format(container, binds))
         return self.post(

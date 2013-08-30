@@ -87,3 +87,6 @@ class Container(dict):
     def ports(self):
         return self['Ports']
 
+    @property
+    def ip(self):
+        return self['NetworkSettings']['IPAddress']

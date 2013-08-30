@@ -165,11 +165,22 @@ class Shipper(object):
         self.parallel(self.c.attach, calls)
         return containers
 
+
+    def inspect(self, *containers):
+        calls = []
+        hosts = []
+        for c in containers:
+            calls.append((c.host, {'container': c}))
+            hosts.append(c.host)
+        responses = self.parallel(self.c.inspect, calls)
+        return _flatten(responses, hosts, Container)
+
     def run(self, image, command, **kwargs):
         """Creates a container and runs it
         """
         hosts = copy(self.hosts)
         once = kwargs.pop('once')
+        detailed = kwargs.pop('detailed')
         if once:
             containers = self.containers(
                 image=image, command=command, running=True)
@@ -190,6 +201,9 @@ class Shipper(object):
         self.start(*containers, binds=binds)
         self.log.debug("Containers({}) {} {} started".format(
                 containers, image, command))
+
+        if detailed:
+            return self.inspect(*containers)
         return containers
 
 
