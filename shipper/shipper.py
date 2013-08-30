@@ -179,8 +179,8 @@ class Shipper(object):
         """Creates a container and runs it
         """
         hosts = copy(self.hosts)
-        once = kwargs.pop('once')
-        detailed = kwargs.pop('detailed')
+        once = kwargs.pop('once', False)
+        detailed = kwargs.pop('detailed', False)
         if once:
             containers = self.containers(
                 image=image, command=command, running=True)
