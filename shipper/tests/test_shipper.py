@@ -8,11 +8,8 @@ from twisted.internet.defer import maybeDeferred, succeed
 from twisted.trial.unittest import TestCase
 
 from shipper.client import Client
+from shipper.container import Container
 from shipper.shipper import Shipper
-
-
-def _container(host, container_id):
-    return mock.Mock(host=host, id=container_id)
 
 
 class ShipperCommands(TestCase):
@@ -47,8 +44,8 @@ class ShipperCommands(TestCase):
         self.client.wait.side_effect = (
             lambda *args, **kwargs: succeed('wait_success'))
 
-        containers = [_container('localhost:1234', '1'),
-                      _container('localhost:2345', '2')]
+        containers = [Container('localhost:1234', {'Id': '1'}),
+                      Container('localhost:2345', {'Id': '2'})]
         result = self.shipper.wait(*containers)
 
         self.client.wait.assert_has_calls([
