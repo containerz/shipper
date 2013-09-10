@@ -28,7 +28,7 @@ class ShipperCommands(TestCase):
         self.shipper = Shipper(
             client_builder=lambda *args, **kwargs: self.client)
 
-        # this just runs the call and
+        # this just runs the call and returns the result of the deferred
         def _fake_blocking_call_from_thread(reactor, call, *args, **kwargs):
             d = maybeDeferred(call, *args, **kwargs)
             return self.successResultOf(d)
@@ -40,9 +40,9 @@ class ShipperCommands(TestCase):
 
     def test_wait(self):
         """
-        Client.wait is called for every host in Shipper, for every container
-        passed to Shipper.wait.  The result is a list of results from all the
-        hosts.
+        Client.wait is called for every for every container passed to
+        Shipper.wait.  The result is a list tuples of container: results
+        for all the containers.
         """
         self.client.wait.side_effect = (
             lambda *args, **kwargs: succeed('wait_success'))

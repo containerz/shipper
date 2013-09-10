@@ -162,9 +162,18 @@ class Client(object):
 
     def wait(self, host, container):
         """Waits for the container to stop and gets the exit code"""
-        return self.post(
+
+        def log_results(results):
+            self.log.debug("{0} has stopped with exit code {1}".format(
+                container, results['StatusCode']))
+            return results
+
+        d = self.post(
             host, "containers/{}/wait".format(container.id),
             expect_json=True)
+
+        d.addCallback(log_results)
+        return d
 
     def request(self, method, host, path, **kwargs):
 

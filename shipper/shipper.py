@@ -232,7 +232,7 @@ class Shipper(object):
         formatter = logging.Formatter(
             "%(levelname)-5.5s PID:%(process)d [%(name)s] %(message)s")
         cls._add_console_output(cls.log, formatter)
-        #cls._add_syslog_output(cls.log, formatter)
+        cls._add_syslog_output(cls.log, formatter)
 
 
     @classmethod
