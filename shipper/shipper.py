@@ -51,9 +51,14 @@ class Shipper(object):
         threads.blockingCallFromThread(
             reactor, cls.pool.closeCachedConnections)
 
-    def __init__(self, hosts=None, version="1.4", timeout=None):
+    def __init__(self, hosts=None, version="1.4", timeout=None,
+                 client_builder=None):
         self.hosts = parse_hosts(hosts or ["localhost"])
-        self.c = Client(version, timeout, log=self.log, pool=self.pool)
+
+        if client_builder is None:
+            client_builder = Client
+        self.c = client_builder(
+            version, timeout, log=self.log, pool=self.pool)
 
         self.version = version
         self.timeout = timeout
@@ -165,6 +170,18 @@ class Shipper(object):
         self.parallel(self.c.attach, calls)
         return containers
 
+    def wait(self, *containers):
+        """
+        Blocks until all the container stop, and returns a list of
+        tuples of the container and a JSON blob containing its status code.
+        """
+        calls = []
+        hosts = []
+        for c in containers:
+            calls.append((c.host, {'container': c}))
+            hosts.append(c.host)
+        responses = self.parallel(self.c.wait, calls)
+        return zip(containers, responses)
 
     def inspect(self, *containers):
         calls = []
@@ -215,7 +232,7 @@ class Shipper(object):
         formatter = logging.Formatter(
             "%(levelname)-5.5s PID:%(process)d [%(name)s] %(message)s")
         cls._add_console_output(cls.log, formatter)
-        cls._add_syslog_output(cls.log, formatter)
+        #cls._add_syslog_output(cls.log, formatter)
 
 
     @classmethod
