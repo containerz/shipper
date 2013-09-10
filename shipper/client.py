@@ -160,12 +160,18 @@ class Client(object):
         d.addErrback(on_error)
         return result
 
+    def wait(self, host, container):
+        """Waits for the container to stop and gets the exit code"""
+        return self.post(
+            host, "containers/{}/wait".format(container.id),
+            expect_json=True)
+
     def request(self, method, host, path, **kwargs):
 
         kwargs = copy(kwargs)
         kwargs['params'] = _remove_empty(kwargs.get('params'))
         kwargs['pool'] = self.pool
-        
+
         post_json = kwargs.pop('post_json', False)
         if post_json:
             headers = kwargs.setdefault('headers', {})
@@ -177,7 +183,7 @@ class Client(object):
 
         result = Deferred()
         d = method(**kwargs)
-        
+
         def content(response):
             content = []
             cd = treq.collect(response, content.append)
@@ -204,7 +210,7 @@ class Client(object):
         return self.request(treq.post, host, path, **kwargs)
 
     def delete(self, host, path, **kwargs):
-        return self.request(treq.post, host, path, **kwargs)    
+        return self.request(treq.post, host, path, **kwargs)
 
 
 
