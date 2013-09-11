@@ -9,6 +9,7 @@ quirks of the official docker-py client.
 import re
 import logging
 import logging.handlers
+import socket
 from copy import copy
 from collections import namedtuple
 
@@ -231,11 +232,15 @@ class Shipper(object):
 
     @classmethod
     def _add_syslog_output(cls, log, formatter):
-        h = logging.handlers.SysLogHandler(address='/dev/log')
-        h.setLevel(logging.DEBUG)
+        try:
+            h = logging.handlers.SysLogHandler(address='/dev/log')
+            h.setLevel(logging.DEBUG)
 
-        h.setFormatter(formatter)
-        log.addHandler(h)
+            h.setFormatter(formatter)
+            log.addHandler(h)
+        except socket.error:
+            # Skip setting up syslog if /dev/log doesn't exist
+            pass
 
 
 Response = namedtuple("Response", "host code content")
