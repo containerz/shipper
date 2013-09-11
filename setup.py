@@ -13,7 +13,7 @@ setup(name='shipper',
       install_requires=[
           "nose==1.3.0",
           "mock==1.0.1",
-          "docker-py==0.1.2",
+          "docker-py==0.1.5",
           "treq==0.2.0",
           "ago==0.0.5",
           "texttable==0.8.1",
