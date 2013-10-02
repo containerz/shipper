@@ -49,8 +49,17 @@ def run(*args):
     function = args.fn
 
     Shipper.startup()
+    failed = []
+    def call(*args, **kwargs):
+        try:
+            function(*args, **kwargs)
+        except:
+            failed.append(True)
+        else:
+            failed.append(False)
+        
 
-    t = Thread(target=function, args=(args,))
+    t = Thread(target=call, args=(args,))
     t.daemon = True
     t.start()
 
@@ -64,6 +73,12 @@ def run(*args):
     w.start()
 
     reactor.run()
+
+    if failed[0]:
+        print "Fail"
+        exit(-1)
+    else:
+        print "Success"
 
 def _info():
     """Returns the module doc string"""
