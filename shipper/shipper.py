@@ -64,7 +64,7 @@ class Shipper(object):
         self.version = version
         self.timeout = timeout
 
-    def build(self, path=None, fobj=None, tag=None, quiet=False):
+    def build(self, path=None, fobj=None, tag=None, quiet=False, nocache=False, rm=False):
         """Run build of a container from buildfile
         that can be passed as local/remote path or file object(fobj)
         """
@@ -74,7 +74,7 @@ class Shipper(object):
             for host in self.hosts:
                 deferreds.append(
                     self.c.build(
-                        host, dockerfile, tag=tag, quiet=quiet))
+                        host, dockerfile, tag=tag, quiet=quiet, nocache=nocache, rm=rm))
             return defer.gatherResults(deferreds, consumeErrors=True)
 
         responses = threads.blockingCallFromThread(reactor, call)

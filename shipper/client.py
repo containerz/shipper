@@ -28,18 +28,20 @@ class Client(object):
     pool = None
     log = None
 
-    def __init__(self, version="1.4", timeout=None, log=None, pool=None):
+    def __init__(self, version="1.5", timeout=None, log=None, pool=None):
         self.pool = pool or HTTPConnectionPool(reactor, persistent=False)
         self.version = version
         self.timeout = timeout
         self.log = log or logging.getLogger(__name__)
 
-    def build(self, host, dockerfile, tag=None, quiet=False):
+    def build(self, host, dockerfile, tag=None, quiet=False, nocache=False, rm=False):
         """Run build of a container from buildfile
         that can be passed as local/remote path or file object(fobj)
         """
         params = {
-            'q': quiet
+            'q': quiet,
+            'nocache': nocache,
+            'rm': rm
         }
 
         if dockerfile.is_remote:
