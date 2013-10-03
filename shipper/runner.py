@@ -16,6 +16,7 @@ limitations under the License.
 
 import argparse
 import inspect
+import logging
 from threading import Thread
 
 from twisted.internet import reactor
@@ -49,11 +50,13 @@ def run(*args):
     function = args.fn
 
     Shipper.startup()
+    log = logging.getLogger(__name__)
     failed = []
     def call(*args, **kwargs):
         try:
             function(*args, **kwargs)
         except:
+            log.exception("Exception calling shipper!")
             failed.append(True)
         else:
             failed.append(False)
@@ -75,10 +78,10 @@ def run(*args):
     reactor.run()
 
     if failed[0]:
-        print "Fail"
+        log.error("Shipper call resulted in failure")
         exit(-1)
     else:
-        print "Success"
+        log.error("Shipper executed successfully")
 
 def _info():
     """Returns the module doc string"""
