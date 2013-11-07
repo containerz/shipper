@@ -18,7 +18,7 @@ from twisted.web.client import HTTPConnectionPool
 from twisted.internet import threads
 from twisted.internet import defer
 
-from .utils import parse_volumes
+from .utils import parse_volumes, parse_ports
 from .container import Container, ContainerConfig
 from .image import Image
 from .host import parse_hosts
@@ -52,7 +52,7 @@ class Shipper(object):
         threads.blockingCallFromThread(
             reactor, cls.pool.closeCachedConnections)
 
-    def __init__(self, hosts=None, version="1.4", timeout=None,
+    def __init__(self, hosts=None, version="1.6", timeout=None,
                  client_builder=None):
         self.hosts = parse_hosts(hosts or ["localhost"])
 
@@ -147,7 +147,10 @@ class Shipper(object):
 
     def start(self, *containers, **kwargs):
         self.log.debug("Starting {}".format(containers))
-        kwargs = [(c.host, {"container": c, "binds": kwargs.get("binds")})
+        _, port_binds = parse_ports(kwargs.get('ports', []))
+        kwargs = [(c.host, {"container": c,
+                            "binds": kwargs.get("binds"),
+                            "port_binds": port_binds})
                   for c in containers]
         self.parallel(self.c.start, kwargs)
 
@@ -216,7 +219,7 @@ class Shipper(object):
         config = ContainerConfig(image, command, **kwargs)
         containers = self.create_container(config, hosts)
 
-        self.start(*containers, binds=binds)
+        self.start(*containers, binds=binds, ports=kwargs.get('ports', []))
         self.log.debug("Containers({}) {} {} started".format(
                 containers, image, command))
 

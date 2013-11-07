@@ -60,7 +60,7 @@ class ClientCommands(TestCase):
                           container=mock.Mock(id='__id__'))
 
         self.treq.post.assert_called_once_with(
-            url="http://localhost/v1.4/containers/__id__/wait",
+            url="http://localhost/v1.6/containers/__id__/wait",
             params={},
             pool=mock.ANY)
 

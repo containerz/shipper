@@ -73,3 +73,25 @@ def parse_volumes(vals):
         else:
             volumes[string] = {}
     return volumes, binds
+
+
+def parse_ports(vals):
+    """
+    Parses ports from format "hostPort:containerPort"
+    into ExposedPorts and PortBindings tuples
+    """
+    exposed = {}
+    bindings = {}
+
+    for pair in vals:
+        ports = pair.split(":")
+        if len(ports) != 2:
+            raise ValueError("Unspported format")
+        host_port, container_port = ports
+
+        container_key = "{}/tcp".format(container_port)
+        exposed[container_key] = {}
+        bindings.setdefault(container_key, []).append(
+            {"HostIp": "", "HostPort": host_port})
+
+    return (exposed, bindings)

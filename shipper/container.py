@@ -5,7 +5,7 @@
 import six
 import shlex
 
-from .utils import from_epoch
+from .utils import from_epoch, parse_ports
 
 
 class ContainerConfig(dict):
@@ -19,9 +19,10 @@ class ContainerConfig(dict):
             command = shlex.split(command)
 
         get = kwargs.get
+        exposed_ports, _ = parse_ports(get('ports', []))
         self.update({
                 'Hostname': get('hostname'),
-                'PortSpecs': get('ports'),
+                'ExposedPorts': exposed_ports,
                 'User': get('user'),
                 'Tty': get('tty', False),
                 'OpenStdin': get('open_stdin', False),

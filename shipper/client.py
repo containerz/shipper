@@ -28,7 +28,7 @@ class Client(object):
     pool = None
     log = None
 
-    def __init__(self, version="1.5", timeout=None, log=None, pool=None):
+    def __init__(self, version="1.6", timeout=None, log=None, pool=None):
         self.pool = pool or HTTPConnectionPool(reactor, persistent=False)
         self.version = version
         self.timeout = timeout
@@ -119,11 +119,16 @@ class Client(object):
             host, "containers/{}/json".format(container.id),
             expect_json=True)
 
-    def start(self, host, container, binds=None):
-        self.log.debug("Starting {} {}".format(container, binds))
+    def start(self, host, container, binds=None, port_binds=None):
+        self.log.debug("Starting {} {} {}".format(container, binds, port_binds))
+        data = {}
+        if binds:
+            data['Binds'] = binds
+        if port_binds:
+            data['PortBindings'] = port_binds
         return self.post(
             host, "containers/{}/start".format(container.id),
-            data={'Binds': binds} if binds else {},
+            data=data,
             post_json=True,
             expect_json=False)
 
