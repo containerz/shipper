@@ -138,9 +138,9 @@ class Shipper(object):
         else:
             return containers
 
-    def create_container(self, config, hosts=None):
+    def create_container(self, config, hosts=None, name=None):
         hosts = hosts or self.hosts
-        kwargs = [(host, {"config": config}) for host in hosts]
+        kwargs = [(host, {"config": config, "name": name}) for host in hosts]
         responses = self.parallel(self.c.create_container, kwargs)
         return _flatten(responses, hosts, Container)
 
@@ -150,7 +150,8 @@ class Shipper(object):
         _, port_binds = parse_ports(kwargs.get('ports', []))
         kwargs = [(c.host, {"container": c,
                             "binds": kwargs.get("binds"),
-                            "port_binds": port_binds})
+                            "port_binds": port_binds,
+                            "links": kwargs.get("links", [])})
                   for c in containers]
         self.parallel(self.c.start, kwargs)
 
@@ -217,9 +218,13 @@ class Shipper(object):
         volumes, binds = parse_volumes(kwargs.pop('volumes', []))
         kwargs['volumes'] = volumes
         config = ContainerConfig(image, command, **kwargs)
-        containers = self.create_container(config, hosts)
+        containers = self.create_container(
+            config, hosts=hosts, name=kwargs.get('name'))
 
-        self.start(*containers, binds=binds, ports=kwargs.get('ports', []))
+        self.start(*containers,
+                    binds=binds,
+                    ports=kwargs.get('ports', []),
+                    links=kwargs.get('links', []))
         self.log.debug("Containers({}) {} {} started".format(
                 containers, image, command))
 

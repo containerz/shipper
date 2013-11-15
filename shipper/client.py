@@ -107,9 +107,14 @@ class Client(object):
         }
         return self.get(host, 'containers/ps', params=params)
 
-    def create_container(self, host, config):
+    def create_container(self, host, config, name=None):
+        params = {}
+        if name:
+            params['name'] = name
         return self.post(
-            host, "containers/create",
+            host,
+            "containers/create",
+            params=params,
             data=config.to_json(),
             post_json=True)
 
@@ -119,13 +124,16 @@ class Client(object):
             host, "containers/{}/json".format(container.id),
             expect_json=True)
 
-    def start(self, host, container, binds=None, port_binds=None):
+    def start(self, host, container, binds=None, port_binds=None, links=[]):
         self.log.debug("Starting {} {} {}".format(container, binds, port_binds))
         data = {}
         if binds:
             data['Binds'] = binds
         if port_binds:
             data['PortBindings'] = port_binds
+        if links:
+            data['Links'] = links
+
         return self.post(
             host, "containers/{}/start".format(container.id),
             data=data,
