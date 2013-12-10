@@ -87,9 +87,17 @@ def parse_ports(vals):
         ports = pair.split(":")
         if len(ports) != 2:
             raise ValueError("Unspported format")
-        host_port, container_port = ports
 
-        container_key = "{}/tcp".format(container_port)
+        host_port, container_port = ports
+        if "/" in container_port:
+            with_protocol = container_port.split("/")
+            if len(with_protocol) != 2:
+                raise ValueError("Unspported format")
+            container_port, protocol = with_protocol
+        else:
+            protocol = "tcp"
+
+        container_key = "{}/{}".format(container_port, protocol)
         exposed[container_key] = {}
         bindings.setdefault(container_key, []).append(
             {"HostIp": "", "HostPort": host_port})

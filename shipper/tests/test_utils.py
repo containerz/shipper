@@ -71,3 +71,19 @@ class ShipperUtilsTestCase(unittest.TestCase):
         self.assertEquals(
             {"/home/container", "/container"}, set(volumes.keys()))
         self.assertEquals(["/home/local:/home/container"], binds)
+
+
+    def test_parse_ports(self):
+        """Parsing port mappings
+        """
+        exposed, binds = utils.parse_ports(["80:80"])
+        self.assertEquals(
+            {'80/tcp': [{'HostIp': '', 'HostPort': '80'}]}, binds)
+        self.assertEquals( {'80/tcp': {}}, exposed)
+
+        exposed, binds = utils.parse_ports(["8125:8125/udp"])
+        self.assertEquals(
+            {'8125/udp': [{'HostIp': '', 'HostPort': '8125'}]}, binds)
+        self.assertEquals( {'8125/udp': {}}, exposed)
+
+
