@@ -26,12 +26,14 @@ from . import Shipper
 
 functions = []
 
+
 def command(fn):
     """Decorator that just register the function
     as the command for the runner
     """
     functions.append(fn)
     return fn
+
 
 def run(*args):
     """Gets the functions directly via arguments, or indirectly
@@ -52,6 +54,7 @@ def run(*args):
     Shipper.startup()
     log = logging.getLogger(__name__)
     failed = []
+
     def call(*args, **kwargs):
         try:
             function(*args, **kwargs)
@@ -60,7 +63,6 @@ def run(*args):
             failed.append(True)
         else:
             failed.append(False)
-        
 
     t = Thread(target=call, args=(args,))
     t.daemon = True
@@ -83,9 +85,9 @@ def run(*args):
     else:
         log.error("Shipper executed successfully")
 
+
 def _info():
     """Returns the module doc string"""
     frm = inspect.stack()[-1]
     mod = inspect.getmodule(frm[0])
     return mod.__doc__ or ""
-

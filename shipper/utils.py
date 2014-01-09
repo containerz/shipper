@@ -35,8 +35,8 @@ def human_size(num):
     if num == 1:
         return "1 byte"
 
-    for x in ['bytes','KB','MB','GB']:
-        if num < 1024.0 and num > -1024.0:
+    for x in ['bytes', 'KB', 'MB', 'GB']:
+        if -1024.0 < num < 1024.0:
             if round(num) == num:
                 return "%d %s" % (num, x)
             else:

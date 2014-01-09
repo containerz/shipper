@@ -32,7 +32,7 @@ class ShipperCommands(TestCase):
 
         self.blocking_call = mock.patch(
             'shipper.shipper.threads.blockingCallFromThread',
-            side_effect = _fake_blocking_call_from_thread).start()
+            side_effect=_fake_blocking_call_from_thread).start()
         self.addCleanup(mock.patch.stopall)
 
     def test_wait(self):

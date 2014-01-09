@@ -36,7 +36,6 @@ class ShipperContainerTestCase(unittest.TestCase):
         }
         self.assertEqual(expected, config)
 
-
     def test_container_config(self):
         """Make sure all parameters are converted
         properly and to the right properties.

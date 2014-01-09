@@ -26,7 +26,7 @@ class DockerFile(object):
     * or a local tar archive
     """
     def __init__(self, path=None, fobj=None):
-        self.archive, self.url  = _parse_build(path, fobj)
+        self.archive, self.url = _parse_build(path, fobj)
 
     @property
     def is_remote(self):
@@ -35,7 +35,6 @@ class DockerFile(object):
     @property
     def is_local(self):
         return self.archive is not None
-
 
 
 def _parse_build(path=None, fobj=None):
@@ -82,4 +81,3 @@ def _archive_from_file(dockerfile):
         return memfile.getvalue()
     finally:
         memfile.close()
-

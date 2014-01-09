@@ -26,7 +26,6 @@ class ShipperUtilsTestCase(unittest.TestCase):
         epoch_now = timegm(now.timetuple())
         self.assertEqual(now, utils.from_epoch(epoch_now))
 
-
     def test_human_size(self):
         """
         Makes sure human_size converts properly
@@ -42,7 +41,6 @@ class ShipperUtilsTestCase(unittest.TestCase):
         self.assertEquals(
             "1.2 TB", utils.human_size(1024 * 1024 * 1024 * 1024 * 1.2))
 
-
     @mock.patch('shipper.utils.datetime')
     def test_time_ago(self, m):
         """Testing sane formatting for times
@@ -50,7 +48,6 @@ class ShipperUtilsTestCase(unittest.TestCase):
         m.utcnow = mock.Mock(return_value=datetime(2013, 3, 4, 1, 2, 3, 0))
         self.assertEqual(
             "59 days ago", utils.time_ago(datetime(2013, 1, 4, 1, 2, 3, 0)))
-
 
     def test_parse_volumes_invalid_params(self):
         self.assertEquals(
@@ -63,7 +60,7 @@ class ShipperUtilsTestCase(unittest.TestCase):
         """Parsing volumes parameter
         """
         volumes, binds = utils.parse_volumes(["/home/local:/home/container"])
-        self.assertEquals({"/home/container":{}}, volumes)
+        self.assertEquals({"/home/container": {}}, volumes)
         self.assertEquals(["/home/local:/home/container"], binds)
 
         volumes, binds = utils.parse_volumes(
@@ -72,18 +69,15 @@ class ShipperUtilsTestCase(unittest.TestCase):
             {"/home/container", "/container"}, set(volumes.keys()))
         self.assertEquals(["/home/local:/home/container"], binds)
 
-
     def test_parse_ports(self):
         """Parsing port mappings
         """
         exposed, binds = utils.parse_ports(["80:80"])
         self.assertEquals(
             {'80/tcp': [{'HostIp': '', 'HostPort': '80'}]}, binds)
-        self.assertEquals( {'80/tcp': {}}, exposed)
+        self.assertEquals({'80/tcp': {}}, exposed)
 
         exposed, binds = utils.parse_ports(["8125:8125/udp"])
         self.assertEquals(
             {'8125/udp': [{'HostIp': '', 'HostPort': '8125'}]}, binds)
-        self.assertEquals( {'8125/udp': {}}, exposed)
-
-
+        self.assertEquals({'8125/udp': {}}, exposed)
