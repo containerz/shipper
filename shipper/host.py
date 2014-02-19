@@ -19,7 +19,8 @@ def parse_hosts(hosts, default_port=4243):
             out.append(Host("http://{}:{}".format(host, port)))
 
         elif isinstance(param, str):
-            if not (param.startswith("http://") or param.startswith("https://")):
+            if not (param.startswith("http://") or
+                    param.startswith("https://")):
                 param = "http://{}".format(param)
 
             if not re.search(r":\d+", param):
@@ -53,5 +54,3 @@ class Host(object):
 
     def __eq__(self, other):
         return str(self.a) == other
-
-

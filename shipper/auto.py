@@ -20,10 +20,12 @@ from collections import namedtuple
 Arg = namedtuple("Arg", "name default")
 NoDefault = object()
 
+
 def generate(parser, *fn):
     subparsers = parser.add_subparsers(help="Yo")
     for fn in fn:
         _from_function(subparsers, fn)
+
 
 def _from_function(subparsers, fn):
     arguments = _inspect_arguments(fn)
@@ -36,7 +38,7 @@ def _from_function(subparsers, fn):
             if a.default in (True, False):
                 parser.add_argument(
                     "--{}".format(a.name),
-                    choices=["yes","no"],
+                    choices=["yes", "no"],
                     default="yes" if a.default else "no")
             else:
                 parser.add_argument("--{}".format(a.name), default=a.default)
@@ -50,6 +52,7 @@ def _from_function(subparsers, fn):
         return fn(**kwargs)
 
     parser.set_defaults(fn=call)
+
 
 def _inspect_arguments(fn):
     spec = inspect.getargspec(fn)

@@ -19,6 +19,7 @@ from twisted.web.client import ResponseDone
 import treq
 from .errors import assert_code
 
+
 class Client(object):
     """A generic twisted-based docker client that supports all sorts of
     docker magic like streaming replies and http session hijacking on
@@ -34,7 +35,8 @@ class Client(object):
         self.timeout = timeout
         self.log = log or logging.getLogger(__name__)
 
-    def build(self, host, dockerfile, tag=None, quiet=False, nocache=False, rm=False):
+    def build(self, host, dockerfile, tag=None, quiet=False,
+              nocache=False, rm=False):
         """Run build of a container from buildfile
         that can be passed as local/remote path or file object(fobj)
         """
@@ -55,6 +57,7 @@ class Client(object):
 
         container = []
         result = Deferred()
+
         def on_content(line):
             if line:
                 self.log.debug("{}: {}".format(host, line.strip()))
@@ -92,7 +95,6 @@ class Client(object):
                             params=params,
                             expect_json=not viz)
 
-
     def containers(self, host,
                    quiet=False, all=False, trunc=True, latest=False,
                    since=None, before=None, limit=-1, pretty=False,
@@ -118,14 +120,14 @@ class Client(object):
             data=config.to_json(),
             post_json=True)
 
-
     def inspect(self, host, container):
         return self.get(
             host, "containers/{}/json".format(container.id),
             expect_json=True)
 
     def start(self, host, container, binds=None, port_binds=None, links=[]):
-        self.log.debug("Starting {} {} {}".format(container, binds, port_binds))
+        self.log.debug("Starting {} {} {}".format(container,
+                                                  binds, port_binds))
         data = {}
         if binds:
             data['Binds'] = binds
@@ -158,6 +160,7 @@ class Client(object):
         }
 
         result = Deferred()
+
         def on_content(line):
             if line:
                 self.log.debug("{}: {}".format(host, line.strip()))
@@ -170,6 +173,7 @@ class Client(object):
             pool=self.pool)
 
         d.addCallback(_Reader.listen, kwargs.get('stop_line'))
+
         def on_error(failure):
             pass
         d.addErrback(on_error)
@@ -236,8 +240,6 @@ class Client(object):
     def delete(self, host, path, **kwargs):
         return self.request(treq.post, host, path, **kwargs)
 
-
-
     def _make_url(self, url, method):
         return "{}/v{}/{}".format(url, self.version, method)
 
@@ -276,4 +278,3 @@ class _Reader(Protocol):
         d = Deferred()
         response.deliverBody(cls(d, data))
         return d
-

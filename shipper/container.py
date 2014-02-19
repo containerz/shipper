@@ -21,22 +21,22 @@ class ContainerConfig(dict):
         get = kwargs.get
         exposed_ports, _ = parse_ports(get('ports', []))
         self.update({
-                'Hostname': get('hostname'),
-                'ExposedPorts': exposed_ports,
-                'User': get('user'),
-                'Tty': get('tty', False),
-                'OpenStdin': get('open_stdin', False),
-                'Memory': get('mem_limit', 0),
-                'AttachStdin': get('stdin', False),
-                'AttachStdout': get('stdout', False),
-                'AttachStderr': get('stderr', False),
-                'Env': get('environment'),
-                'Cmd': command,
-                'Dns': get('dns'),
-                'Image': image,
-                'Volumes': get('volumes'),
-                'VolumesFrom': get('volumes_from'),
-                'StdinOnce': get('stdin_once', False)
+            'Hostname': get('hostname'),
+            'ExposedPorts': exposed_ports,
+            'User': get('user'),
+            'Tty': get('tty', False),
+            'OpenStdin': get('open_stdin', False),
+            'Memory': get('mem_limit', 0),
+            'AttachStdin': get('stdin', False),
+            'AttachStdout': get('stdout', False),
+            'AttachStderr': get('stderr', False),
+            'Env': get('environment'),
+            'Cmd': command,
+            'Dns': get('dns'),
+            'Image': image,
+            'Volumes': get('volumes'),
+            'VolumesFrom': get('volumes_from'),
+            'StdinOnce': get('stdin_once', False)
         })
 
     def to_json(self):

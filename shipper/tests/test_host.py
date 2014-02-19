@@ -41,7 +41,6 @@ class ShipperHostTestCase(unittest.TestCase):
         self.assertEqual([], parse_hosts(None))
         self.assertEqual([], parse_hosts(""))
 
-
     def test_parse_hosts(self):
         """Parse hosts strings into structured objects"""
         H = Host

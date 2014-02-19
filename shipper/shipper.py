@@ -22,7 +22,7 @@ from .utils import parse_volumes, parse_ports
 from .container import Container, ContainerConfig
 from .image import Image
 from .host import parse_hosts
-from .pretty import  images_to_ascii_table, containers_to_ascii_table
+from .pretty import images_to_ascii_table, containers_to_ascii_table
 from .client import Client
 from .build import DockerFile
 
@@ -64,22 +64,24 @@ class Shipper(object):
         self.version = version
         self.timeout = timeout
 
-    def build(self, path=None, fobj=None, tag=None, quiet=False, nocache=False, rm=False):
+    def build(self, path=None, fobj=None, tag=None,
+              quiet=False, nocache=False, rm=False):
         """Run build of a container from buildfile
         that can be passed as local/remote path or file object(fobj)
         """
         dockerfile = DockerFile(path, fobj)
+
         def call():
             deferreds = []
             for host in self.hosts:
                 deferreds.append(
                     self.c.build(
-                        host, dockerfile, tag=tag, quiet=quiet, nocache=nocache, rm=rm))
+                        host, dockerfile, tag=tag, quiet=quiet,
+                        nocache=nocache, rm=rm))
             return defer.gatherResults(deferreds, consumeErrors=True)
 
         responses = threads.blockingCallFromThread(reactor, call)
         return [Response(h, 200, r) for h, r in zip(self.hosts, responses)]
-
 
     def parallel(self, method, params):
         def call():
@@ -118,18 +120,18 @@ class Shipper(object):
 
         containers = _flatten(responses, self.hosts, Container)
 
-        if running != None:
+        if running is not None:
             if running:
                 f = lambda x: x.is_running
             else:
                 f = lambda x: x.is_stopped
             containers = filter(f, containers)
 
-        if image != None:
+        if image is not None:
             f = lambda x: re.match(image, x.image)
             containers = filter(f, containers)
 
-        if command != None:
+        if command is not None:
             f = lambda x: re.match(command, x.command)
             containers = filter(f, containers)
 
@@ -144,7 +146,6 @@ class Shipper(object):
         responses = self.parallel(self.c.create_container, kwargs)
         return _flatten(responses, hosts, Container)
 
-
     def start(self, *containers, **kwargs):
         self.log.debug("Starting {}".format(containers))
         _, port_binds = parse_ports(kwargs.get('ports', []))
@@ -157,11 +158,10 @@ class Shipper(object):
 
     def stop(self, *containers, **kwargs):
         self.log.debug("Stopping {}".format(containers))
-        stop_args = [(c.host, {
-                    "container": c,
-                    "wait_seconds": kwargs.get('wait_seconds', 5)
-                 })
-                 for c in containers]
+        stop_args = [(c.host,
+                      {"container": c,
+                       "wait_seconds": kwargs.get('wait_seconds', 5)})
+                     for c in containers]
         self.parallel(self.c.stop, stop_args)
         return containers
 
@@ -222,16 +222,15 @@ class Shipper(object):
             config, hosts=hosts, name=kwargs.get('name'))
 
         self.start(*containers,
-                    binds=binds,
-                    ports=kwargs.get('ports', []),
-                    links=kwargs.get('links', []))
+                   binds=binds,
+                   ports=kwargs.get('ports', []),
+                   links=kwargs.get('links', []))
         self.log.debug("Containers({}) {} {} started".format(
-                containers, image, command))
+            containers, image, command))
 
         if detailed:
             return self.inspect(*containers)
         return containers
-
 
     @classmethod
     def _init_logging(cls, **kwargs):
@@ -243,7 +242,6 @@ class Shipper(object):
         cls._add_console_output(cls.log, formatter)
         cls._add_syslog_output(cls.log, formatter)
 
-
     @classmethod
     def _add_console_output(cls, log, formatter):
         # create console handler and set level to debug
@@ -253,7 +251,6 @@ class Shipper(object):
         # create formatter
         h.setFormatter(formatter)
         log.addHandler(h)
-
 
     @classmethod
     def _add_syslog_output(cls, log, formatter):
@@ -270,11 +267,13 @@ class Shipper(object):
 
 Response = namedtuple("Response", "host code content")
 
+
 def _grouped_by_host(values):
     grouped = {}
     for v in values:
         grouped.setdefault(v.host, []).append(v)
     return grouped
+
 
 def _flatten(values, hosts, cls):
     out = []
