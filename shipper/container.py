@@ -23,7 +23,7 @@ class ContainerConfig(dict):
         self.update({
             'Hostname': get('hostname'),
             'ExposedPorts': exposed_ports,
-            'User': get('user'),
+            'User': get('user', ''),
             'Tty': get('tty', False),
             'OpenStdin': get('open_stdin', False),
             'Memory': get('mem_limit', 0),
