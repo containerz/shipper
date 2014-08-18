@@ -30,7 +30,7 @@ class ShipperContainerTestCase(unittest.TestCase):
             'StdinOnce': False,
             'ExposedPorts': {},
             'Tty': False,
-            'User': None,
+            'User': '',
             'Volumes': None,
             'VolumesFrom': None
         }
