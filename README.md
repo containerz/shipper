@@ -5,7 +5,7 @@ Supports parallel execution and can generate command line interface.
 
 hello.py:
 ```python
-from shipper import *
+from shipper import Shipper, run, command
 
 @command
 def hello():
